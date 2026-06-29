@@ -1,0 +1,7 @@
+{
+  "name": "zia-ai_agent",
+  "version": "1.0.0",
+  "dependencies": {
+    "groq-sdk": "^0.10.0"
+  }
+}
