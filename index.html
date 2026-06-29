@@ -51,19 +51,23 @@ async function sendMessage() {
   inputEl.value = '';
   sendBtn.disabled = true;
   const botMsgEl = addMessage('', 'bot');
-  try {
-    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chatHistory }) });
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let fullReply = '';
-    while(true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value);
-      fullReply += chunk;
-      botMsgEl.textContent = fullReply;
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: chatHistory })
+        });
+
+        const data = await res.json();
+        
+        // JSON se reply nikal kar \n ko line breaks (<br />) mein badalna
+        const formattedReply = data.reply.replace(/\n/g, '<br />');
+        
+        // textContent ki jagah innerHTML use karein taake emojis aur line breaks sahi dikhein
+        botMsgEl.innerHTML = formattedReply;
+
+    } catch (e) {
+      
     chatHistory.push({ role: "assistant", content: fullReply });
   } catch (e) {
     botMsgEl.textContent = "Server error aa gaya bhai.";
