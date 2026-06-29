@@ -1,13 +1,14 @@
-import Groq from "groq-sdk";
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   const { messages } = req.body;
+  const apiKey = process.env.GROQ_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'Groq API Key is missing in Vercel Environment Variables.' });
+  }
 
   // ===== ZIA DILSHAD AI TEACHER - DIMAG =====
   const systemPrompt = {
@@ -69,17 +70,31 @@ Do NOT tell the student what the code is.`
   // ============================================
 
   try {
-    const response = await groq.chat.completions.create({
-      messages: [systemPrompt, ...messages],
-      model: "llama-3.1-70b-versatile",
-      temperature: 0.1,
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-70b-versatile",
+        messages: [systemPrompt, ...messages],
+        temperature: 0.1
+      })
     });
 
-    const reply = response.choices[0]?.message?.content || 'Koi jawab nahi mila.';
-    return res.status(200).json({ reply: reply });
+    const data = await response.json();
+    
+    if (data.choices && data.choices[0]) {
+      const reply = data.choices[0].message.content;
+      return res.status(200).json({ reply: reply });
+    } else {
+      console.error("Groq Error Response:", data);
+      return res.status(500).json({ error: "Groq se sahi response nahi mila." });
+    }
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ error: 'Failed to fetch from Groq.' });
+    return res.status(500).json({ error: "Server fetching error." });
   }
 }
