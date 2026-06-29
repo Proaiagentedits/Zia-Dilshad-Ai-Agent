@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZIA DILSHAD AI TEACHER</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+  :root { 
+    --bg: #0B0B0F; 
+    --card: rgba(20, 20, 25, 0.7); 
+    --border: rgba(255,215,0,0.2); 
+    --accent: #FFD700; 
+    --text: #EAEAEA; 
+  }
+  body { font-family: 'Inter', system-ui; background: radial-gradient(1000px 500px at 80% -10%, #2a2412 0%, var(--bg) 60%); color: var(--text); margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+  .chat-box { width: 100%; max-width: 650px; height: 92vh; background: var(--card); backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 24px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 40px rgba(255, 215, 0, 0.1); }
+  header { padding: 18px 20px; border-bottom: 1px solid var(--border); text-align: center; background: rgba(0,0,0,0.2);}
+  header h1 { margin: 0; font-size: 17px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);}
+  .messages { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+  .msg { padding: 14px 18px; border-radius: 16px; max-width: 85%; line-height: 1.7; white-space: pre-wrap; font-size: 15px; }
+  .user { background: linear-gradient(135deg, #FFD700, #E6B800); color: #0B0B0F; margin-left: auto; border-bottom-right-radius: 6px; font-weight: 600; }
+  .bot { background: #1A1A1F; margin-right: auto; border: 1px solid var(--border); border-bottom-left-radius: 6px; }
+  .input-area { display: flex; padding: 18px; border-top: 1px solid var(--border); gap: 10px; background: rgba(0,0,0,0.2); }
+  input { flex: 1; padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: #0F0F14; color: var(--text); outline: none; font-size: 15px; }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(255,215,0,0.2); }
+  button { padding: 14px 22px; border: none; border-radius: 12px; background: linear-gradient(135deg, #FFD700, #E6B800); color: #0B0B0F; cursor: pointer; font-weight: 700; font-size: 15px; transition: all 0.2s;}
+  button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+</style>
+</head>
+<body>
+  <div class="chat-box">
+    <header><h1>ZIA DILSHAD AI TEACHER</h1></header>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <input id="input" placeholder="Message likho..." />
+      <button id="send">Send</button>
+    </div>
+  </div>
+<script>
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+let chatHistory = [];
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  addMessage(text, 'user');
+  chatHistory.push({ role: "user", content: text });
+  inputEl.value = '';
+  sendBtn.disabled = true;
+  const botMsgEl = addMessage('', 'bot');
+  try {
+    const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: chatHistory }) });
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let fullReply = '';
+    while(true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value);
+      fullReply += chunk;
+      botMsgEl.textContent = fullReply;
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    chatHistory.push({ role: "assistant", content: fullReply });
+  } catch (e) {
+    botMsgEl.textContent = "Server error aa gaya bhai.";
+  }
+  sendBtn.disabled = false;
+}
+function addMessage(text, who) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + who;
+  div.textContent = text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
+sendBtn.onclick = sendMessage;
+inputEl.onkeypress = e => { if(e.key === 'Enter') sendMessage(); };
+</script>
+</body>
+</html>
