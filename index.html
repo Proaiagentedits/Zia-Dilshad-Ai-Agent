@@ -44,12 +44,45 @@ const inputEl = document.getElementById('input');
 const sendBtn = document.getElementById('send');
 let chatHistory = [];
 async function sendMessage() {
+async function sendMessage() {
   const text = inputEl.value.trim();
   if (!text) return;
+
   addMessage(text, 'user');
   chatHistory.push({ role: "user", content: text });
   inputEl.value = '';
   sendBtn.disabled = true;
+
+  const botMsgEl = addMessage('', 'bot');
+
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ messages: chatHistory })
+    });
+
+    const data = await res.json();
+
+    if (data && data.reply) {
+      const formattedReply = data.reply.replace(/\n/g, '<br />');
+      botMsgEl.innerHTML = formattedReply;
+      chatHistory.push({ role: "assistant", content: data.reply });
+    } else {
+      botMsgEl.textContent = "Groq se sahi response nahi mila.";
+    }
+
+  } catch (e) {
+    console.error(e);
+    botMsgEl.textContent = "Server error aa gaya hai.";
+  }
+
+  sendBtn.disabled = false;
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+  
   const botMsgEl = addMessage('', 'bot');
     try {
         const res = await fetch('/api/chat', {
