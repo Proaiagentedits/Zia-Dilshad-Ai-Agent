@@ -39,84 +39,68 @@
     </div>
   </div>
 <script>
-const messagesEl = document.getElementById('messages');
-const inputEl = document.getElementById('input');
-const sendBtn = document.getElementById('send');
-let chatHistory = [];
-async function sendMessage() {
-async function sendMessage() {
-  const text = inputEl.value.trim();
-  if (!text) return;
+  const inputEl = document.getElementById('inputEl') || document.querySelector('input[type="text"]') || document.querySelector('input');
+  const sendBtn = document.getElementById('sendBtn') || document.querySelector('button');
+  const messagesEl = document.getElementById('messagesEl') || document.querySelector('.messages') || document.getElementById('chat-box');
+  let chatHistory = [];
 
-  addMessage(text, 'user');
-  chatHistory.push({ role: "user", content: text });
-  inputEl.value = '';
-  sendBtn.disabled = true;
-
-  const botMsgEl = addMessage('', 'bot');
-
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ messages: chatHistory })
-    });
-
-    const data = await res.json();
-
-    if (data && data.reply) {
-      const formattedReply = data.reply.replace(/\n/g, '<br />');
-      botMsgEl.innerHTML = formattedReply;
-      chatHistory.push({ role: "assistant", content: data.reply });
-    } else {
-      botMsgEl.textContent = "Groq se sahi response nahi mila.";
-    }
-
-  } catch (e) {
-    console.error(e);
-    botMsgEl.textContent = "Server error aa gaya hai.";
+  function addMessage(text, who) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + who;
+    div.innerHTML = text; // innerHTML use kiya taake <br /> kaam karein
+    messagesEl.appendChild(div);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return div;
   }
 
-  sendBtn.disabled = false;
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-}
-  
-  const botMsgEl = addMessage('', 'bot');
-    try {
-        const res = await fetch('/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: chatHistory })
-        });
+  async function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
 
-        const data = await res.json();
-        
-        // JSON se reply nikal kar \n ko line breaks (<br />) mein badalna
+    addMessage(text, 'user');
+    chatHistory.push({ role: "user", content: text });
+    inputEl.value = '';
+    sendBtn.disabled = true;
+
+    const botMsgEl = addMessage('', 'bot');
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ messages: chatHistory })
+      });
+
+      const data = await res.json();
+
+      if (data && data.reply) {
+        // \n ko line breaks me badlein
         const formattedReply = data.reply.replace(/\n/g, '<br />');
-        
-        // textContent ki jagah innerHTML use karein taake emojis aur line breaks sahi dikhein
         botMsgEl.innerHTML = formattedReply;
+        chatHistory.push({ role: "assistant", content: data.reply });
+      } else {
+        botMsgEl.textContent = "Groq se sahi response nahi mila.";
+      }
 
     } catch (e) {
-      
-    chatHistory.push({ role: "assistant", content: fullReply });
-  } catch (e) {
-    botMsgEl.textContent = "Server error aa gaya bhai.";
+      console.error(e);
+      botMsgEl.textContent = "Server error aa gaya hai.";
+    }
+
+    sendBtn.disabled = false;
+    messagesEl.scrollTop = messagesEl.scrollHeight;
   }
-  sendBtn.disabled = false;
-}
-function addMessage(text, who) {
-  const div = document.createElement('div');
-  div.className = 'msg ' + who;
-  div.textContent = text;
-  messagesEl.appendChild(div);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
-  return div;
-}
-sendBtn.onclick = sendMessage;
-inputEl.onkeypress = e => { if(e.key === 'Enter') sendMessage(); };
-  </script>
+
+  // Click aur Enter key handlers ko dobara bind karna
+  if (sendBtn) sendBtn.onclick = sendMessage;
+  if (inputEl) {
+    inputEl.onkeypress = e => { 
+      if (e.key === 'Enter') sendMessage(); 
+    };
+  }
+</script>
 </body>
 </html>
+
