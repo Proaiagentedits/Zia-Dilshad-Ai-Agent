@@ -3,7 +3,7 @@ import Groq from "groq-sdk";
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 export default async function handler(req, res) {
-  if (req.method!== 'POST') {
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
@@ -34,7 +34,7 @@ JazzCash: 03046386644
 
 💯 GUARANTEE: Payment karte hi aapko mere is private AI teaching ka access 5 minutes k andr mil jayega
 
-Payment karte hi is no pr SS WhatsApp kar dein: 03046386644"
+Payment karte hi is no pr SS WhatsApp kar edin: 03046386644"
 
 RULES AFTER SALE MESSAGE:
 Rule 1 - Agar student "bhai mehenga hai" ya "free hai?" poche, to bolo: "Bhai sirf Rs. 99 one-time hai. Isme aapko lifetime AI Teacher mil raha hai jo 24/7 sikhayega. 1 coffee se bhi sasta 😊"
@@ -69,24 +69,17 @@ Do NOT tell the student what the code is.`
   // ============================================
 
   try {
-    const stream = await groq.chat.completions.create({
-      messages: [systemPrompt,...messages],
+    const response = await groq.chat.completions.create({
+      messages: [systemPrompt, ...messages],
       model: "llama-3.1-70b-versatile",
-      stream: true,
-      temperature: 0.1, // Bilkul seedha, no bakwas
+      temperature: 0.1,
     });
 
-    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Transfer-Encoding', 'chunked');
-
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content || '';
-      res.write(content);
-    }
-    res.end();
+    const reply = response.choices[0]?.message?.content || 'Koi jawab nahi mila.';
+    return res.status(200).json({ reply: reply });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Failed to fetch from Groq.' });
+    return res.status(500).json({ error: 'Failed to fetch from Groq.' });
   }
 }
