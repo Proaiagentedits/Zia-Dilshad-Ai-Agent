@@ -77,12 +77,13 @@ Do NOT tell the student what the code is.`
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.1-70b-versatile",
+        model: "llama-3.1-8b-instant",
         messages: [systemPrompt, ...messages],
         temperature: 0.1
       })
     });
-
+    
+  
     const data = await response.json();
     
     if (data.choices && data.choices[0]) {
