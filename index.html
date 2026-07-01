@@ -7,137 +7,174 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
-            font-family: 'Segoe UI', sans-serif; 
-            background: #0a0a0a; 
-            color: #fff; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            background: #0f0f0f; 
+            color: white; 
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
         }
 
-        /* Top Navigation Tabs */
-        .tabs-nav {
-            display: flex;
+        /* Top Course Section */
+        .course-header {
             background: #161616;
-            border-bottom: 2px solid #222;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 15px;
-            background: none;
-            border: none;
-            color: #aaa;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-        }
-        .tab-btn.active {
-            color: #ffcc00;
-            border-bottom: 3px solid #ffcc00;
-            background: #1f1f1f;
-        }
-
-        /* Container for content */
-        .tab-content {
-            flex: 1;
-            overflow-y: auto;
-            display: none;
             padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #ffcc00;
         }
-        .tab-content.active {
-            display: flex;
-            flex-direction: column;
+        .hero-title {
+            font-size: 1.8rem;
+            color: #ffcc00;
+            margin-bottom: 5px;
+            font-weight: 800;
         }
-
-        /* Course View */
-        .badge {
-            background: #ffcc00; color: #000; padding: 5px 12px;
-            font-weight: bold; border-radius: 20px; font-size: 0.8rem;
-            align-self: flex-start; margin-bottom: 15px;
-        }
-        .hero-title { font-size: 2rem; color: #ffcc00; margin-bottom: 10px; }
-        .course-desc { color: #aaa; margin-bottom: 20px; line-height: 1.4; }
-        
-        .video-container { 
-            position: relative; width: 100%; aspect-ratio: 16/9;
-            border-radius: 12px; overflow: hidden; background: #000;
-            border: 1px solid #ffcc00; box-shadow: 0 0 10px rgba(255,204,0,0.2);
+        .course-desc {
+            font-size: 0.9rem;
+            color: #bbb;
+            margin-bottom: 15px;
         }
 
-        /* Chat View Fixed */
-        .chat-container {
+        /* Video Container - Working standard embed */
+        .video-box {
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        /* Main Chat Window Area (Just like your original setup) */
+        .chat-section {
+            flex: 1;
             display: flex;
             flex-direction: column;
-            height: 100%;
+            background: #0f0f0f;
+            padding: 15px;
         }
+
         #messagesEl { 
-            flex: 1; overflow-y: auto; padding-bottom: 20px;
-            display: flex; flex-direction: column; gap: 12px;
+            flex: 1; 
+            overflow-y: auto; 
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-bottom: 20px;
         }
-        .msg { padding: 12px; border-radius: 12px; max-width: 85%; line-height: 1.4; }
-        .user { background: #ffcc00; color: #000; align-self: flex-end; }
-        .bot { background: #1a1a1a; color: #fff; align-self: flex-start; border: 1px solid #222; }
 
-        .input-area { 
-            display: flex; gap: 10px; padding: 10px 0;
-            background: #0a0a0a; border-top: 1px solid #222;
+        .msg { 
+            padding: 12px 16px; 
+            border-radius: 14px; 
+            max-width: 85%; 
+            line-height: 1.4;
+            font-size: 0.95rem;
         }
-        #inputEl { flex: 1; padding: 12px; background: #222; border: 1px solid #333; border-radius: 8px; color: #fff; outline: none; }
-        #sendBtn { padding: 12px 20px; background: #ffcc00; color: #000; border: none; border-radius: 8px; font-weight: bold; }
+        
+        .user { 
+            background: #ffcc00; 
+            color: #000;
+            align-self: flex-end; 
+            border-bottom-right-radius: 2px;
+            font-weight: bold;
+        }
+        
+        .bot { 
+            background: #1a1a1a; 
+            color: #fff;
+            align-self: flex-start; 
+            border-bottom-left-radius: 2px;
+            border: 1px solid #222;
+        }
+
+        /* Fixed Footer Input Area */
+        .input-area { 
+            display: flex; 
+            gap: 10px;
+            background: #161616;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #222;
+        }
+        
+        #inputEl { 
+            flex: 1; 
+            padding: 12px; 
+            background: #222; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+        }
+        #inputEl:focus { border-color: #ffcc00; }
+        
+        #sendBtn { 
+            padding: 12px 24px; 
+            background: #ffcc00; 
+            color: #000; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer;
+        }
+        #sendBtn:disabled { background: #555; color: #aaa; }
     </style>
 </head>
 <body>
 
-    <!-- Tabs Layout for Mobile/Web Perfect View -->
-    <div class="tabs-nav">
-        <button class="tab-btn active" onclick="switchTab('course-tab', this)">📖 View Course</button>
-        <button class="tab-btn" onclick="switchTab('chat-tab', this)">💬 AI Teacher</button>
-    </div>
-
-    <!-- TAB 1: Course Details & Video -->
-    <div id="course-tab" class="tab-content active">
-        <div class="badge">LIVE COURSE ACTIVE</div>
-        <h1 class="hero-title">PRO AI VIDEO EDITING</h1>
-        <p class="course-desc">Master CapCut & Premiere Pro with Zia Dilshad. Tap below to start learning inside the app!</p>
+    <!-- Course Section (Stays on Top) -->
+    <div class="course-header">
+        <h1 class="hero-title">PRO AI VIDEO EDITING COURSE</h1>
+        <p class="course-desc">Master CapCut & Premiere Pro with Zia Dilshad. Click play to start learning inside the app!</p>
         
-        <div class="video-container" onclick="this.innerHTML='<iframe width=\'100%\' height=\'100%\' src=\'https://www.youtube.com/embed/k26_p445p0Y?autoplay=1\' frameborder=\'0\' style=\'position:absolute;top:0;left:0;width:100%;height:100%;\' allow=\'autoplay; encrypted-media\' allowfullscreen></iframe>'">
-            <img src="https://img.youtube.com/vi/k26_p445p0Y/maxresdefault.jpg" style="width:100%; height:100%; object-fit:cover;" alt="Thumbnail">
-            <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; font-weight:bold; color:#ffcc00;">▶ TAP TO PLAY VIDEO</div>
+        <!-- Standard YouTube Embed that actually works inside the page -->
+        <div class="video-box">
+            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/ScMzIvxBSi4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
     </div>
 
-    <!-- TAB 2: 100% Working Chatbox -->
-    <div id="chat-tab" class="tab-content">
-        <div class="chat-container">
-            <div id="messagesEl"></div>
-            <div class="input-area">
-                <input type="text" id="inputEl" placeholder="Type a message...">
-                <button id="sendBtn">Send</button>
-            </div>
+    <!-- Chat Area (Stays below the video, always visible) -->
+    <div class="chat-section">
+        <div id="messagesEl"></div>
+        <div class="input-area">
+            <input type="text" id="inputEl" placeholder="Message likho...">
+            <button id="sendBtn">Send</button>
         </div>
     </div>
 
 <script>
-    // Tab switching logic
-    function switchTab(tabId, btn) {
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        btn.classList.add('active');
-    }
-
     const inputEl = document.getElementById('inputEl');
     const sendBtn = document.getElementById('sendBtn');
     const messagesEl = document.getElementById('messagesEl');
     let chatHistory = [];
 
-    function addMessage(text, who) {
+    // Auto welcome message on screen load
+    window.onload = () => {
+        addMessage('{"reply":"Assalamualaikum! Main Zia Dilshad hoon❤️\\n\\nMain aapko CapCut aur Premiere Pro bilkul zero se sikhaunga. Step by step, 1 step at a time. 500+ students already seekh chuke hain ✅\\n\\nSubscription Fee: Sirf Rs. 99 - One Time\\n\\nJazzCash: 03046386644\\n\\n💯 GUARANTEE: Payment karte hi aapko mere is private AI teaching ka access 5 minutes k andr mil jayega\\n\\nPayment karte hi is no pr SS WhatsApp kar edin: 03046386644"}', 'bot');
+    };
+
+    function addMessage(rawText, who) {
         const div = document.createElement('div');
         div.className = 'msg ' + who;
-        div.innerHTML = text; 
+        
+        let cleanText = rawText;
+        // Agar response me JSON framework ho to usay parse kar ke text nikalna
+        if (who === 'bot') {
+            try {
+                if (rawText.startsWith('{')) {
+                    const parsed = JSON.parse(rawText);
+                    cleanText = parsed.reply;
+                }
+            } catch (e) {
+                cleanText = rawText;
+            }
+            // \n ko line breaks me badalna
+            cleanText = cleanText.replace(/\n/g, '<br />');
+        }
+
+        div.innerHTML = cleanText; 
         messagesEl.appendChild(div);
         messagesEl.scrollTop = messagesEl.scrollHeight;
         return div;
@@ -164,6 +201,7 @@
             const data = await res.json();
 
             if (data && data.reply) {
+                // Purani textContent ki jagah innerHTML lagaya aur formatted text dala
                 const formattedReply = data.reply.replace(/\n/g, '<br />');
                 botMsgEl.innerHTML = formattedReply;
                 chatHistory.push({ role: "assistant", content: data.reply });
